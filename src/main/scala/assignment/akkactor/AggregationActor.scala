@@ -5,6 +5,7 @@ import akka.actor.typed.scaladsl.Behaviors
 
 import scala.collection.mutable
 
+case class State(data: Map[String, Stats])
 object AggregationActor {
   def apply(): Behavior[Command] =
     Behaviors.setup { context =>
@@ -27,7 +28,7 @@ object AggregationActor {
           }
           Behaviors.same
 
-        case CalculateAverages(_) =>
+        case CalculateAverages(replyTo) =>
           context.log.info("Sensors with highest avg humidity:")
           context.log.info("sensor-id,min,avg,max")
           finalData.foreach {
@@ -35,6 +36,12 @@ object AggregationActor {
               val average = stats.sum / stats.count
               context.log.info(s"$id,${stats.min},$average,${stats.max}")
           }
+          replyTo ! AveragesCalculated()
+          Behaviors.same
+
+        case GetState(replyTo) =>
+          // Reply with the current state of the actor
+          replyTo ! State(finalData.toMap)
           Behaviors.same
       }
     }

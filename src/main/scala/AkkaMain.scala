@@ -37,7 +37,6 @@ object AkkaMain extends App {
         println("Message processing failed")
     }
 
-    // Await the termination of the ActorSystem
     Await.result(system.whenTerminated, Duration.Inf)
     ()
   }

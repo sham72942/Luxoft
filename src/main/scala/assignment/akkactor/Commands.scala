@@ -12,3 +12,5 @@ case class Processed(filePath: String) extends Command
 case class AveragesCalculated() extends Command
 case class UpdatedData(value: Map[String, Stats]) extends Command
 
+case class GetState(replyTo: ActorRef[State]) extends Command
+
