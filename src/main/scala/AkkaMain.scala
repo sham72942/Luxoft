@@ -1,8 +1,6 @@
-package assignment.akkactor
-
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-//import assignment.AkkaActor._
+import assignment.akkactor._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -20,12 +18,10 @@ object AkkaMain extends App {
   def processSensorDataFiles(directoryPath: String): Unit = {
     val files = new java.io.File(directoryPath).listFiles.map(_.getPath).filter(_.endsWith(".csv")).toList
 
-    // Create and start file processing actors
     val fileProcessorActors = files.map { filePath =>
       system.systemActorOf(FileProcessor(aggregationActor), s"fileProcessorActor_${filePath.hashCode}")
     }
 
-    // Create a list of futures to track message processing completion
     val processingFutures = files.zip(fileProcessorActors).map { case (file, actor) =>
       val replyPromise = Promise[Processed]()
       actor ! ProcessFileWithPromise(file, replyPromise)
