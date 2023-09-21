@@ -31,10 +31,9 @@ object AkkaMain extends App {
     // Wait for all message processing to complete
     Future.sequence(processingFutures).onComplete {
       case Success(_) =>
-        // All messages processed, calculate averages
         aggregationActor ! CalculateAverages(system.ignoreRef)
       case Failure(exception) =>
-        println("Message processing failed")
+        println(s"Message processing failed: ${exception}")
     }
 
     Await.result(system.whenTerminated, Duration.Inf)

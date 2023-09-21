@@ -6,7 +6,6 @@ import scala.util.Try
 
 object SensorManager {
   def getSensorDataMap(filePath: String): Map[String, Stats] = {
-    println(s"start getSensorDataMap for file ${filePath}")
 
     val sensorDataMap = mutable.Map.empty[String, Stats]
 
@@ -34,11 +33,9 @@ object SensorManager {
       )
       sensorDataMap(sensorData.sensorId) = newStats
 
-      // Read the next line
       line = bufferedReader.readLine()
     }
 
-    // Close the file reader
     bufferedReader.close()
 
     collection.immutable.Map(sensorDataMap.toSeq: _*)

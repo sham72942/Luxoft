@@ -34,7 +34,6 @@ object AggregationActor {
           Behaviors.same
 
         case GetState(replyTo) =>
-          // Reply with the current state of the actor
           replyTo ! State(finalData.toMap)
           Behaviors.same
       }
