@@ -1,7 +1,7 @@
 package assignment.akkactor
 
 import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 
 import scala.collection.mutable
 
@@ -29,13 +29,7 @@ object AggregationActor {
           Behaviors.same
 
         case CalculateAverages(replyTo) =>
-          context.log.info("Sensors with highest avg humidity:")
-          context.log.info("sensor-id,min,avg,max")
-          finalData.foreach {
-            case (id, stats) =>
-              val average = stats.sum / stats.count
-              context.log.info(s"$id,${stats.min},$average,${stats.max}")
-          }
+          printFinalData(finalData, context)
           replyTo ! AveragesCalculated()
           Behaviors.same
 
@@ -45,5 +39,29 @@ object AggregationActor {
           Behaviors.same
       }
     }
+
+  def printFinalData(finalData : mutable.Map[String, Stats], context: ActorContext[Command]): Unit = {
+    val count = finalData.map(_._2.count).sum
+    val failedCount = finalData.map(_._2.failedCount).sum
+    context.log.info(s"Num of processed measurements: ${count-failedCount}")
+    context.log.info(s"Num of failed measurements: ${failedCount}\n")
+    context.log.info("Sensors with highest avg humidity:\n")
+    context.log.info("sensor-id,min,avg,max")
+    finalData.toList
+      .sortWith { (data1, data2) =>
+        val stat1 = data1._2
+        val stat2 = data2._2
+        stat1.sum / stat1.count > stat2.sum / stat2.count
+      }
+      .foreach {
+        case (id, stats) =>
+          if (stats.count == stats.failedCount) {
+            context.log.info(s"$id,NaN,NaN,NaN")
+          } else {
+            val average = stats.sum / stats.count
+            context.log.info(s"$id,${stats.min},$average,${stats.max}")
+          }
+      }
+  }
 }
 
