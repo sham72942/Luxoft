@@ -12,17 +12,19 @@ class AggregationActor extends LuxoftActor {
       Behaviors.receiveMessage {
         case UpdatedData(data) =>
           // Merge data from different files into finalData
-          data.foreach {
-            case (id, stats) =>
-              val currentStats = finalData.getOrElse(id, Stats(0, 0.0, Int.MaxValue, Int.MinValue, 0))
-              val newStats = Stats(
-                currentStats.failedCount + stats.failedCount,
-                currentStats.sum + stats.sum,
-                Math.min(currentStats.min, stats.min),
-                Math.max(currentStats.max, stats.max),
-                currentStats.count + stats.count
-              )
-              finalData(id) = newStats
+          data.foreach { case (id, stats) =>
+            val currentStats = finalData.getOrElse(
+              id,
+              Stats(0, 0.0, Int.MaxValue, Int.MinValue, 0)
+            )
+            val newStats = Stats(
+              currentStats.failedCount + stats.failedCount,
+              currentStats.sum + stats.sum,
+              Math.min(currentStats.min, stats.min),
+              Math.max(currentStats.max, stats.max),
+              currentStats.count + stats.count
+            )
+            finalData(id) = newStats
           }
           Behaviors.same
 
@@ -38,7 +40,10 @@ class AggregationActor extends LuxoftActor {
     }
   }
 
-  def printFinalData(finalData: mutable.Map[String, Stats], context: ActorContext[Command]): Unit = {
+  def printFinalData(
+    finalData: mutable.Map[String, Stats],
+    context: ActorContext[Command]
+  ): Unit = {
     val count = finalData.map(_._2.count).sum
     val failedCount = finalData.map(_._2.failedCount).sum
     context.log.info(s"Num of processed measurements: ${count - failedCount}")
@@ -51,15 +56,13 @@ class AggregationActor extends LuxoftActor {
         val stat2 = data2._2
         stat1.sum / stat1.count > stat2.sum / stat2.count
       }
-      .foreach {
-        case (id, stats) =>
-          if (stats.count == stats.failedCount) {
-            context.log.info(s"$id,NaN,NaN,NaN")
-          } else {
-            val average = stats.sum / stats.count
-            context.log.info(s"$id,${stats.min},$average,${stats.max}")
-          }
+      .foreach { case (id, stats) =>
+        if (stats.count == stats.failedCount) {
+          context.log.info(s"$id,NaN,NaN,NaN")
+        } else {
+          val average = stats.sum / stats.count
+          context.log.info(s"$id,${stats.min},$average,${stats.max}")
+        }
       }
   }
 }
-
