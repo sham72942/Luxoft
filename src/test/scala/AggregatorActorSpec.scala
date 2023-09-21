@@ -46,5 +46,6 @@ class AggregatorActorSpec
 
   override def afterAll(): Unit = {
     testSystem.shutdownTestKit()
-    super.afterAll()}
+    super.afterAll()
+  }
 }
