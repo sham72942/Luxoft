@@ -24,8 +24,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % AkkaVersion,
   "ch.qos.logback" % "logback-classic" % "1.2.3",
 
-//  "org.scalameta" % "sbt-scalafmt" % "2.4.6",
-
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
   "org.scalatest" %% "scalatest" % "3.2.10" % Test,
   "org.mockito" %% "mockito-scala" % "1.16.37" % Test

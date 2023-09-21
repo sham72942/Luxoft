@@ -24,6 +24,3 @@ jobs:
         cache: 'sbt'
     - name: Run tests
       run: sbt test
-
-    - name: Check for scalafmt conformance
-      uses: openlawteam/scalafmt-ci@v2
