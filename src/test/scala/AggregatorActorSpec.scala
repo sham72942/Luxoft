@@ -1,6 +1,9 @@
 package assignment.akkactor
 
-import akka.actor.testkit.typed.scaladsl.{ActorTestKit, ScalaTestWithActorTestKit}
+import akka.actor.testkit.typed.scaladsl.{
+  ActorTestKit,
+  ScalaTestWithActorTestKit
+}
 import akka.actor.typed.ActorRef
 import org.mockito.MockitoSugar
 import org.scalatest.BeforeAndAfterEach
@@ -9,10 +12,10 @@ import org.scalatest.wordspec.AnyWordSpecLike
 
 class AggregatorActorSpec
   extends ScalaTestWithActorTestKit
-    with AnyWordSpecLike
-    with Matchers
-    with MockitoSugar
-    with BeforeAndAfterEach {
+  with AnyWordSpecLike
+  with Matchers
+  with MockitoSugar
+  with BeforeAndAfterEach {
 
   val testSystem = ActorTestKit()
 
@@ -43,7 +46,5 @@ class AggregatorActorSpec
 
   override def afterAll(): Unit = {
     testSystem.shutdownTestKit()
-    super.afterAll()
-  }
+    super.afterAll()}
 }
-
