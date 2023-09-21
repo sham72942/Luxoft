@@ -8,6 +8,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
+import java.io.File
 import scala.concurrent.Promise
 
 class FileProcessorSpec
@@ -26,7 +27,9 @@ class FileProcessorSpec
   "FileProcessor" should {
 
     "reply with Processed when processing a file" in {
-      val filePath = "C:\\Users\\shamo\\Documents\\Luxoft Sensor Assignment\\src\\test\\resources\\test.csv"
+
+      val filePath = new File("src/test/resources/test.csv").getAbsoluteFile.getPath
+
       val myActor = createFileProcessorActor()
       val replyPromise = Promise[Processed]()
       myActor ! ProcessFileWithPromise(filePath, replyPromise)
