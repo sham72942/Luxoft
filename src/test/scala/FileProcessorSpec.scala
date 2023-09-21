@@ -19,8 +19,10 @@ class FileProcessorSpec
     with BeforeAndAfterEach {
 
   val aggregationActor: ActorRef[Command] = testKit.spawn(Behaviors.empty)
-  def createFileProcessorActor(): ActorRef[Command] =
-    testKit.spawn(FileProcessor(aggregationActor))
+  def createFileProcessorActor(): ActorRef[Command] = {
+    val fileProcessorImpl = new FileProcessor(aggregationActor)
+    testKit.spawn(fileProcessorImpl.behavior())
+  }
 
   val testSystem = ActorTestKit()
 

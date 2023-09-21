@@ -10,7 +10,8 @@ import scala.util.{Failure, Success}
 object AkkaMain extends App {
 
   val system: ActorSystem[Command] = ActorSystem(Behaviors.empty, "SensorDataProcessing")
-  val aggregationActor = system.systemActorOf(AggregationActor(), "aggregationActor")
+  val ag = new AggregationActor()
+  val aggregationActor = system.systemActorOf(ag.behavior(), "aggregationActor")
   val directoryPath = args.headOption.getOrElse("")
 
   processSensorDataFiles(directoryPath)
@@ -19,7 +20,8 @@ object AkkaMain extends App {
     val files = new java.io.File(directoryPath).listFiles.map(_.getPath).filter(_.endsWith(".csv")).toList
 
     val fileProcessorActors = files.map { filePath =>
-      system.systemActorOf(FileProcessor(aggregationActor), s"fileProcessorActor_${filePath.hashCode}")
+      val fileProcessor = new FileProcessor(aggregationActor)
+      system.systemActorOf(fileProcessor.behavior(), s"fileProcessorActor_${filePath.hashCode}")
     }
 
     val processingFutures = files.zip(fileProcessorActors).map { case (file, actor) =>

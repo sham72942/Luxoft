@@ -4,10 +4,8 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 
 import scala.collection.mutable
-
-case class State(data: Map[String, Stats])
-object AggregationActor {
-  def apply(): Behavior[Command] =
+class AggregationActor extends LuxoftActor {
+  override def behavior(): Behavior[Command] = {
     Behaviors.setup { context =>
       val finalData = mutable.Map.empty[String, Stats]
 
@@ -38,11 +36,12 @@ object AggregationActor {
           Behaviors.same
       }
     }
+  }
 
-  def printFinalData(finalData : mutable.Map[String, Stats], context: ActorContext[Command]): Unit = {
+  def printFinalData(finalData: mutable.Map[String, Stats], context: ActorContext[Command]): Unit = {
     val count = finalData.map(_._2.count).sum
     val failedCount = finalData.map(_._2.failedCount).sum
-    context.log.info(s"Num of processed measurements: ${count-failedCount}")
+    context.log.info(s"Num of processed measurements: ${count - failedCount}")
     context.log.info(s"Num of failed measurements: ${failedCount}\n")
     context.log.info("Sensors with highest avg humidity:\n")
     context.log.info("sensor-id,min,avg,max")
@@ -63,4 +62,41 @@ object AggregationActor {
       }
   }
 }
+
+
+//object AggregationActor {
+//  def apply(): Behavior[Command] =
+//    Behaviors.setup { context =>
+//      val finalData = mutable.Map.empty[String, Stats]
+//
+//      Behaviors.receiveMessage {
+//        case UpdatedData(data) =>
+//          // Merge data from different files into finalData
+//          data.foreach {
+//            case (id, stats) =>
+//              val currentStats = finalData.getOrElse(id, Stats(0, 0.0, Int.MaxValue, Int.MinValue, 0))
+//              val newStats = Stats(
+//                currentStats.failedCount + stats.failedCount,
+//                currentStats.sum + stats.sum,
+//                Math.min(currentStats.min, stats.min),
+//                Math.max(currentStats.max, stats.max),
+//                currentStats.count + stats.count
+//              )
+//              finalData(id) = newStats
+//          }
+//          Behaviors.same
+//
+//        case CalculateAverages(replyTo) =>
+//          printFinalData(finalData, context)
+//          replyTo ! AveragesCalculated()
+//          Behaviors.same
+//
+//        case GetState(replyTo) =>
+//          replyTo ! State(finalData.toMap)
+//          Behaviors.same
+//      }
+//    }
+
+
+//}
 
