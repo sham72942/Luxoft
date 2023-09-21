@@ -35,6 +35,7 @@ object SensorManager {
         Math.max(currentStats.max, sensorData.humidity.getOrElse(Int.MinValue)),
         currentStats.count + 1
       )
+
       sensorDataMap(sensorData.sensorId) = newStats
 
       line = bufferedReader.readLine()
