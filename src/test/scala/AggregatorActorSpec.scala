@@ -18,8 +18,9 @@ class AggregatorActorSpec
 
   "An AggregationActor" should {
     "correctly aggregate and calculate averages" in {
+      val ag = new AggregationActor
       val aggregationActor: ActorRef[Command] =
-        testSystem.spawn(AggregationActor(), "aggregationActor")
+        testSystem.spawn(ag.behavior(), "aggregationActor")
 
       val updatedData1 = UpdatedData(Map("sensor1" -> Stats(0, 10.0, 0, 10, 1)))
       val updatedData2 = UpdatedData(Map("sensor2" -> Stats(0, 20.0, 0, 20, 1)))

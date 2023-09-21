@@ -2,14 +2,13 @@ package assignment.akkactor
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import assignment.akkactor.SensorManager.getSensorDataMap
 
-object FileProcessor {
-  def apply(aggregationActor: ActorRef[Command]): Behavior[Command] =
+class FileProcessor(aggregationActor: ActorRef[Command]) extends LuxoftActor {
+  override def behavior(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       message match {
         case ProcessFileWithPromise(filePath, replyPromise) =>
-          val sensorDataMap = getSensorDataMap(filePath)
+          val sensorDataMap = SensorManager.getSensorDataMap(filePath)
           aggregationActor ! UpdatedData(sensorDataMap)
           replyPromise.success(Processed(filePath))
           Behaviors.same
