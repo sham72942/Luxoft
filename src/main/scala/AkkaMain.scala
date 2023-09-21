@@ -9,7 +9,8 @@ import scala.util.{Failure, Success}
 
 object AkkaMain extends App {
 
-  val system: ActorSystem[Command] = ActorSystem(Behaviors.empty, "SensorDataProcessing")
+  val system: ActorSystem[Command] =
+    ActorSystem(Behaviors.empty, "SensorDataProcessing")
   val ag = new AggregationActor()
   val aggregationActor = system.systemActorOf(ag.behavior(), "aggregationActor")
   val directoryPath = args.headOption.getOrElse("")
@@ -17,18 +18,25 @@ object AkkaMain extends App {
   processSensorDataFiles(directoryPath)
 
   def processSensorDataFiles(directoryPath: String): Unit = {
-    val files = new java.io.File(directoryPath).listFiles.map(_.getPath).filter(_.endsWith(".csv")).toList
+    val files = new java.io.File(directoryPath).listFiles
+      .map(_.getPath)
+      .filter(_.endsWith(".csv"))
+      .toList
 
     val fileProcessorActors = files.map { filePath =>
       val fileProcessor = new FileProcessor(aggregationActor)
-      system.systemActorOf(fileProcessor.behavior(), s"fileProcessorActor_${filePath.hashCode}")
+      system.systemActorOf(
+        fileProcessor.behavior(),
+        s"fileProcessorActor_${filePath.hashCode}"
+      )
     }
 
-    val processingFutures = files.zip(fileProcessorActors).map { case (file, actor) =>
-      val replyPromise = Promise[Processed]()
-      actor ! ProcessFileWithPromise(file, replyPromise)
-      replyPromise.future
-    }
+    val processingFutures =
+      files.zip(fileProcessorActors).map { case (file, actor) =>
+        val replyPromise = Promise[Processed]()
+        actor ! ProcessFileWithPromise(file, replyPromise)
+        replyPromise.future
+      }
 
     // Wait for all message processing to complete
     Future.sequence(processingFutures).onComplete {

@@ -19,4 +19,3 @@ class FileProcessor(aggregationActor: ActorRef[Command]) extends LuxoftActor {
       }
     }
 }
-
