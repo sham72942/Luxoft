@@ -1,4 +1,4 @@
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorSystem, Props}
 import akka.actor.typed.scaladsl.Behaviors
 import assignment.akkactor._
 
@@ -15,9 +15,12 @@ object AkkaMain extends App {
   val aggregationActor = system.systemActorOf(ag.behavior(), "aggregationActor")
   val directoryPath = args.headOption.getOrElse("")
 
-  processSensorDataFiles(directoryPath)
+  val fileProcessorTpd =
+    Props.empty.withDispatcherFromConfig("fileProcessor-tpd")
 
-  def processSensorDataFiles(directoryPath: String): Unit = {
+  processSensorDataFiles(directoryPath, fileProcessorTpd)
+
+  def processSensorDataFiles(directoryPath: String, dispatcher: Props): Unit = {
     val files = new java.io.File(directoryPath).listFiles
       .map(_.getPath)
       .filter(_.endsWith(".csv"))
@@ -27,8 +30,8 @@ object AkkaMain extends App {
       val fileProcessor = new FileProcessor(aggregationActor)
       system.systemActorOf(
         fileProcessor.behavior(),
-        s"fileProcessorActor_${filePath.hashCode}"
-      )
+        s"fileProcessorActor_${filePath.hashCode}",
+        dispatcher)
     }
 
     val processingFutures =
@@ -42,6 +45,7 @@ object AkkaMain extends App {
     Future.sequence(processingFutures).onComplete {
       case Success(_) =>
         aggregationActor ! CalculateAverages(system.ignoreRef)
+        system.terminate()
       case Failure(exception) =>
         println(s"Message processing failed: ${exception}")
     }
